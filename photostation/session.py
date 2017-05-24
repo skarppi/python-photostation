@@ -1,6 +1,7 @@
 import requests.cookies
 import os
 import pickle
+import time
 from urlparse import urlparse
 from pprint import pprint, pformat
 from error import SynologyException
@@ -34,7 +35,7 @@ class SynologySession(object):
 
     def validate(self, api, response):
         if response.status_code is not 200:
-            print('{} response with code {} and body {}'.format(api, response.status_code, response.text()))
+            print('{} response with code {} and body {}'.format(api, response.status_code, response.text))
             raise SynologyException('The API request cannot been made')
 
         rsp = response.json()
@@ -80,7 +81,8 @@ class SynologyAuthSession(SynologySession):
             'version': 1,
             'method': 'login',
             'username': username,
-            'password': password
+            'password': password,
+            'remember_me': True
             }
 
         r = self.session.get(self.url + self.info[api]['path'], params=params)
@@ -108,6 +110,12 @@ class SynologyAuthSession(SynologySession):
                 jar = requests.cookies.RequestsCookieJar()
                 jar._cookies = cookies
                 self.session.cookies = jar
-                return True
+
+                for cookie in jar:
+                    if cookie.name == 'PHPSESSID':
+                        pprint('session is valid until ' + str(cookie.expires) + ' minus 6 hours, now ' + str(int(time.time())))
+                        return (cookie.expires - 3600 * 6)  > time.time()
+
+                return False
             else:
                 return False
