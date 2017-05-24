@@ -64,13 +64,25 @@ class SynologyAuthSession(SynologySession):
 
     def authenticate(self, username, password):
         cookiefile = './cookies-{}.txt'.format(username)
-        if not self.load_cookies(cookiefile):
-            self.login_query(username, password)
-            self.save_cookies(cookiefile)
+        if self.load_cookies(cookiefile):
+            self.headers = {
+                'X-SYNO-TOKEN': self.session.cookies.get_dict()['PHPSESSID']
+            }
+
+            if self.authenticated():
+                return
+
+        self.login_query(username, password)
+        self.save_cookies(cookiefile)
 
         self.headers = {
             'X-SYNO-TOKEN': self.session.cookies.get_dict()['PHPSESSID']
         }
+
+    def authenticated(self):
+        print('check authentication status')
+        check = self.query('SYNO.PhotoStation.Auth', { 'method': 'checkauth' })
+        return check['permission']['manage']
 
     def login_query(self, username, password):
         print('login request for user ' + username)
