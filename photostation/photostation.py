@@ -15,7 +15,7 @@ class PhotoStationService(object):
         self.root_album = PhotoStationAlbum(None, root_album)
 
     def __str__(self):
-        return 'PhotoStationService root_album=' + str(self.root_album)
+        return 'PhotoStationService root_album:' + str(self.root_album)
 
     def album(self, path, create):
         parent = self.root_album
@@ -54,7 +54,7 @@ class PhotoStationAlbum(object):
         return cls(parent, name)
 
     def __str__(self):
-        return 'path=' + self.path + ',name=' + self.name
+        return '{path:' + self.path + ',name:' + self.name + '}'
 
     def item(self, name):
         return self.items.get(name)
@@ -146,17 +146,21 @@ class PhotoStationPhoto(object):
             filename = PhotoStationUtils.photo_name(psphoto['id']),
             filetype = psphoto['type'],
             mtime = mtime,
-            title = info['title'],
-            description = info['description'],
+            title = info['title'].encode('utf-8'),
+            description = info['description'].encode('utf-8'),
             rating = info['rating'],
             latitude = latitude,
             longitude = longitude)
 
     def __str__(self):
-        return 'filename=' + self.filename + ',filetype=' + self.filetype + \
-            ',mtime=' + str(self.mtime) + ',title=' + self.title + ',description=' + self.description + \
-            ',rating=' + str(self.rating) + ',latitude=' + str(self.latitude) + ',longitude=' + str(self.longitude)
-
+        return '{filename:' + self.filename.decode('utf-8').encode('unicode-escape') + \
+            ',filetype:' + self.filetype + \
+            ',mtime:' + str(self.mtime) + \
+            ',title:' + self.title.decode('utf-8').encode('unicode-escape') + \
+            ',description:' + self.description.decode('utf-8').encode('unicode-escape') + \
+            ',rating:' + str(self.rating) + \
+            ',latitude:' + str(self.latitude) + \
+            ',longitude:' + str(self.longitude) + '}'
 
     # Merge with remote if able.
     # Return false if rewrite is needed.
@@ -167,11 +171,11 @@ class PhotoStationPhoto(object):
             or self.filename != remote.filename \
             or self.filetype != remote.filetype:
 
-            print(self.filetype + ' ' + self.filename + ' cannot be merged with ' + str(remote))
+            print(self.filetype + ' ' + self.filename + ' not found or cannot be merged with ' + str(remote))
             return False
 
         changes = {}
-        if self.title and  self.title != remote.title:
+        if self.title and self.title != remote.title:
             changes['title'] = self.title
         if self.description and self.description != remote.description:
             changes['description'] = self.description
@@ -183,7 +187,7 @@ class PhotoStationPhoto(object):
             changes['gps_lng'] = self.longitude
 
         if len(changes) > 0:
-            print('merging ' + str(self) + ' with ' + str(remote) + ' with changes ' + str(changes))
+            print('merging album ' + self.album.path + ' photo ' + str(self) + ' with remote ' + str(remote) + ' with changes ' + str(changes))
             self.update(changes)
 
         return True

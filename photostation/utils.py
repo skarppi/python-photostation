@@ -6,7 +6,7 @@ class PhotoStationUtils(object):
 
     @staticmethod
     def hex2ascii(hex):
-        return bytearray.fromhex(hex).decode()
+        return bytearray.fromhex(hex).decode('utf-8').encode('utf-8')
 
     @staticmethod
     def album_id(path):
