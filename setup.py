@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='photostation',
-    version='0.1.0',
+    version='0.1.1',
     description='A Python API to communicate with Photo Station running on Synology NAS.',
     long_description=long_description,
     url='https://github.com/skarppi/python-photostation',
