@@ -177,9 +177,9 @@ class PhotoStationPhoto(object):
             changes['description'] = self.description
         if self.rating != remote.rating:
             changes['rating'] = self.rating
-        if self.latitude != remote.latitude:
+        if not PhotoStationUtils.check_coordinates(self.latitude, remote.latitude):
             changes['gps_lat'] = self.latitude
-        if self.longitude != remote.longitude:
+        if not PhotoStationUtils.check_coordinates(self.longitude, remote.longitude):
             changes['gps_lng'] = self.longitude
 
         if len(changes) > 0:

@@ -26,3 +26,10 @@ class PhotoStationUtils(object):
     @staticmethod
     def photo_name(photo_id):
         return PhotoStationUtils.hex2ascii(photo_id.split('_')[2])
+
+    # check if coordinates match within 0.01 degrees to prevent rounding issues
+    @staticmethod
+    def check_coordinates(coord1, coord2):
+        if not coord1 or not coord2:
+            return coord1 == coord2 
+        return abs(float(coord1) - float(coord2)) < 0.01
