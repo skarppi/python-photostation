@@ -29,11 +29,11 @@ class SynologySession(object):
 
         r = self.session.post(self.url + self.info[api]['path'], data=data, headers=self.headers, files=files)
 
-        print('request: ' + r.url + ' with data ' + pformat(data))
+        #print('request: ' + r.url + ' with data ' + pformat(data))
 
-        return self.validate(api, r)
+        return self.validate(api, data, r)
 
-    def validate(self, api, response):
+    def validate(self, api, request, response):
         if response.status_code is not 200:
             print('{} response with code {} and body {}'.format(api, response.status_code, response.text))
             raise SynologyException('The API request cannot been made')
@@ -41,7 +41,7 @@ class SynologySession(object):
         rsp = response.json()
 
         if not rsp['success']:
-            print('{} response with code {} and body {}'.format(api, response.status_code, pformat(rsp)))
+            print('{} response with code {} and body {} to query {}'.format(api, response.status_code, pformat(rsp), pformat(request)))
             raise SynologyException(rsp['error']['code'])
 
         if 'data' in rsp:
@@ -99,7 +99,8 @@ class SynologyAuthSession(SynologySession):
 
         r = self.session.get(self.url + self.info[api]['path'], params=params)
 
-        data = self.validate('SYNO.PhotoStation.Auth', r)
+        params['password'] = '******'
+        data = self.validate('SYNO.PhotoStation.Auth', params, r)
         pprint('login response ' + pformat(data) + ' with headers ' + pformat(r.headers))
 
     def save_cookies(self, cookiefile):
