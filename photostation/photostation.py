@@ -112,16 +112,17 @@ class PhotoStationAlbum(object):
             })
         self.parent.remove_item(self.name)
 
-    def create_item(self, filename, filetype, mtime, title, description, rating, latitude, longitude):
-        return PhotoStationPhoto(self, filename, filetype, mtime, title, description, rating, latitude, longitude)
+    def create_item(self, filename, filetype, created, modified, title, description, rating, latitude, longitude):
+        return PhotoStationPhoto(self, filename, filetype, created, modified, title, description, rating, latitude, longitude)
 
 class PhotoStationPhoto(object):
 
-    def __init__(self, album, filename, filetype, mtime, title, description, rating, latitude, longitude):
+    def __init__(self, album, filename, filetype, created, modified, title, description, rating, latitude, longitude):
         self.album = album
         self.filename = filename
         self.filetype = filetype
-        self.mtime = mtime
+        self.created = created
+        self.modified = modified
         self.title = title
         self.description = description
         self.rating = rating
@@ -134,7 +135,8 @@ class PhotoStationPhoto(object):
 
         info = psphoto['info']
 
-        mtime = int(time.mktime(time.strptime(info['createdate'], '%Y-%m-%d %H:%M:%S')))
+        created = int(time.mktime(time.strptime(info['takendate'], '%Y-%m-%d %H:%M:%S')))
+        modified = int(time.mktime(time.strptime(info['createdate'], '%Y-%m-%d %H:%M:%S')))
 
         if info.get('gps') is not None:
             latitude = info['gps']['lat']
@@ -145,7 +147,8 @@ class PhotoStationPhoto(object):
         return cls(album, 
             filename = PhotoStationUtils.photo_name(psphoto['id']),
             filetype = psphoto['type'],
-            mtime = mtime,
+            created = created,
+            modified = modified,
             title = info['title'].encode('utf-8'),
             description = info['description'].encode('utf-8'),
             rating = info['rating'],
@@ -155,7 +158,8 @@ class PhotoStationPhoto(object):
     def __str__(self):
         return '{filename:' + self.filename.decode('utf-8').encode('unicode-escape') + \
             ',filetype:' + self.filetype + \
-            ',mtime:' + str(self.mtime) + \
+            ',created:' + str(self.created) + \
+            ',modified:' + str(self.modified) + \
             ',title:' + self.title.decode('utf-8').encode('unicode-escape') + \
             ',description:' + self.description.decode('utf-8').encode('unicode-escape') + \
             ',rating:' + str(self.rating) + \
@@ -172,6 +176,10 @@ class PhotoStationPhoto(object):
             or self.filetype != remote.filetype:
 
             print(self.filetype + ' ' + self.filename + ' not found or cannot be merged with ' + str(remote))
+            return False
+
+        if self.modified > remote.modified:
+            print(self.filetype + ' ' + self.filename + ' modified, replacing remote one ' + str(remote) + ' with ' + str(self))
             return False
 
         changes = {}
@@ -199,7 +207,7 @@ class PhotoStationPhoto(object):
             'dest_folder_path': self.album.path,
             'duplicate': 'overwrite', # rename, ignore
             'filename': self.filename,
-            'mtime': self.mtime,
+            'mtime': self.created,
             'title': self.title,
             'description': self.description,
             'ps_username': PhotoStationService.session.username
