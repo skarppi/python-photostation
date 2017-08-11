@@ -10,7 +10,9 @@ Supported features:
 * Login to your shared or personal Photo Station
 * List album contents
 * Create missing albums automatically
-* Add new photos or update metadata of existing ones
+* Add new photos
+* Update metadata of existing photos
+* Update photo binaries based if either timestamp or filesize differs
 * Delete photos
 
 Tested with Synology DS916+ running DSM 6.1 and Photo Station 6.7.1. Should work with older versions too but you mileage may vary.
@@ -44,7 +46,9 @@ Usage
         photo = album.create_item(
             filename = 'testimage.jpg', # original filename
             filetype = 'photo',         # photo or video 
-            mtime = 1494603121336,      # original timestamp for file
+            created = 1494603121336,    # timestamp of photo capture
+            modified = 1494603121336    # optional timestamp to compare if existing binary has changed
+            filesize = 1000,            # optional filesize to compare if existing binary has changed
             title = '',                 # optional title
             description = '',           # optional description
             rating = 0,                 # optional starts from 0 to 5

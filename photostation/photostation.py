@@ -112,17 +112,18 @@ class PhotoStationAlbum(object):
             })
         self.parent.remove_item(self.name)
 
-    def create_item(self, filename, filetype, created, modified, title, description, rating, latitude, longitude):
-        return PhotoStationPhoto(self, filename, filetype, created, modified, title, description, rating, latitude, longitude)
+    def create_item(self, filename, filetype, created, modified = None, filesize = None, title = None, description = None, rating = None, latitude = None, longitude = None):
+        return PhotoStationPhoto(self, filename, filetype, created, modified, filesize, title, description, rating, latitude, longitude)
 
 class PhotoStationPhoto(object):
 
-    def __init__(self, album, filename, filetype, created, modified, title, description, rating, latitude, longitude):
+    def __init__(self, album, filename, filetype, created, modified, filesize, title, description, rating, latitude, longitude):
         self.album = album
         self.filename = filename
         self.filetype = filetype
         self.created = created
         self.modified = modified
+        self.filesize = filesize
         self.title = title
         self.description = description
         self.rating = rating
@@ -137,6 +138,7 @@ class PhotoStationPhoto(object):
 
         created = int(time.mktime(time.strptime(info['takendate'], '%Y-%m-%d %H:%M:%S')))
         modified = int(time.mktime(time.strptime(info['createdate'], '%Y-%m-%d %H:%M:%S')))
+        filesize = int(info['size'])
 
         if info.get('gps') is not None:
             latitude = info['gps']['lat']
@@ -149,6 +151,7 @@ class PhotoStationPhoto(object):
             filetype = psphoto['type'],
             created = created,
             modified = modified,
+            filesize = filesize,
             title = info['title'].encode('utf-8'),
             description = info['description'].encode('utf-8'),
             rating = info['rating'],
@@ -160,6 +163,7 @@ class PhotoStationPhoto(object):
             ',filetype:' + self.filetype + \
             ',created:' + str(self.created) + \
             ',modified:' + str(self.modified) + \
+            ',filesize:' + str(self.filesize) + \
             ',title:' + self.title.decode('utf-8').encode('unicode-escape') + \
             ',description:' + self.description.decode('utf-8').encode('unicode-escape') + \
             ',rating:' + str(self.rating) + \
@@ -170,16 +174,22 @@ class PhotoStationPhoto(object):
     # Return false if rewrite is needed.
     def merge(self):
 
+        fullpath = self.album.path + '/' + self.filename 
+
         remote = self.album.item(self.filename)
         if remote is None \
             or self.filename != remote.filename \
             or self.filetype != remote.filetype:
 
-            print(self.filetype + ' ' + self.filename + ' not found or cannot be merged with ' + str(remote))
+            print(self.filetype + ' ' + fullpath + ' not found or cannot be merged with ' + str(remote))
             return False
 
-        if self.modified > remote.modified:
-            print(self.filetype + ' ' + self.filename + ' modified, replacing remote one ' + str(remote) + ' with ' + str(self))
+        if self.modified is not None and self.modified > remote.modified:
+            print(self.filetype + ' ' + fullpath + ' timestamp differs, replacing existing ' + str(remote) + ' with ' + str(self))
+            return False
+
+        if self.filesize is not None and self.filesize != remote.filesize:
+            print(self.filetype + ' ' + fullpath + ' filesize differs, replacing existing ' + str(remote) + ' with ' + str(self))
             return False
 
         changes = {}
@@ -187,7 +197,7 @@ class PhotoStationPhoto(object):
             changes['title'] = self.title
         if self.description and self.description != remote.description:
             changes['description'] = self.description
-        if self.rating != remote.rating:
+        if self.rating is not None and self.rating != remote.rating:
             changes['rating'] = self.rating
         if not PhotoStationUtils.check_coordinates(self.latitude, remote.latitude):
             changes['gps_lat'] = self.latitude
@@ -195,7 +205,7 @@ class PhotoStationPhoto(object):
             changes['gps_lng'] = self.longitude
 
         if len(changes) > 0:
-            print('merging album ' + self.album.path + ' photo ' + str(self) + ' with remote ' + str(remote) + ' with changes ' + str(changes))
+            print(self.filetype + ' ' + fullpath +  ' has metadata changes ' + str(changes) + ', updating existing ' + str(remote))
             self.update(changes)
 
         return True
