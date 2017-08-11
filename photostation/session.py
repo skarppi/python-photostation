@@ -1,4 +1,5 @@
 import requests.cookies
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 import os
 import pickle
 import time
@@ -23,11 +24,17 @@ class SynologySession(object):
             'query': 'all'
             })
 
-    def query(self, api, data, files=None):
+    def query(self, api, data):
         data.setdefault('api', api)
         data.setdefault('version', 1)
 
-        r = self.session.post(self.url + self.info[api]['path'], data=data, headers=self.headers, files=files)
+        headers=self.headers
+
+        if "original" in data:
+            data = MultipartEncoder(fields=data)
+            headers['Content-Type'] = data.content_type
+
+        r = self.session.post(self.url + self.info[api]['path'], data=data, headers=headers)
 
         #print('request: ' + r.url + ' with data ' + pformat(data))
 

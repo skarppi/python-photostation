@@ -1,5 +1,7 @@
 import requests
 import time
+import io
+from requests_toolbelt.downloadutils import stream
 from session import SynologyAuthSession
 from utils import PhotoStationUtils
 from error import SynologyException
@@ -210,18 +212,23 @@ class PhotoStationPhoto(object):
 
         return True
 
-    def save_content(self, url):
+    def save_content(self, file):
+
+        data = io.BytesIO()
+        stream.stream_response_to_file(file, path=data)
 
         created = PhotoStationService.session.query('SYNO.PhotoStation.File', {
             'method': 'upload' + self.filetype,
+            'version': '1',
             'dest_folder_path': self.album.path,
             'duplicate': 'overwrite', # rename, ignore
             'filename': self.filename,
-            'mtime': self.created,
+            'mtime': str(self.created),
             'title': self.title,
             'description': self.description,
-            'ps_username': PhotoStationService.session.username
-            }, files = {'original': url.raw })
+            'ps_username': PhotoStationService.session.username,
+            'original': (self.filename, data)
+            })
         
         self.update({
             'rating': self.rating,
