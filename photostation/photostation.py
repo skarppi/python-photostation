@@ -230,11 +230,12 @@ class PhotoStationPhoto(object):
             'original': (self.filename, data)
             })
         
-        self.update({
-            'rating': self.rating,
-            'gps_lat': self.latitude,
-            'gps_lng': self.longitude
-        })
+        if self.rating > 0 or (self.latitude and self.longitude):
+            self.update({
+                'rating': self.rating,
+                'gps_lat': self.latitude,
+                'gps_lng': self.longitude
+            })
 
         self.album.add_item(self.filename, self)
 
