@@ -134,12 +134,10 @@ class PhotoStationPhoto(object):
 
     @classmethod
     def from_photostation(cls, album, psphoto):
-        # pprint(psphoto)
-
         info = psphoto['info']
 
-        created = int(time.mktime(time.strptime(info['takendate'], '%Y-%m-%d %H:%M:%S')))
-        modified = int(time.mktime(time.strptime(info['createdate'], '%Y-%m-%d %H:%M:%S')))
+        created = int(time.mktime(time.strptime(info['takendate'], '%Y-%m-%d %H:%M:%S'))) * 1000
+        modified = int(time.mktime(time.strptime(info['createdate'], '%Y-%m-%d %H:%M:%S'))) * 1000
         filesize = int(info['size'])
 
         if info.get('gps') is not None:
@@ -186,7 +184,7 @@ class PhotoStationPhoto(object):
             print(self.filetype + ' ' + fullpath + ' not found or cannot be merged with ' + str(remote))
             return False
 
-        if self.modified is not None and self.modified > remote.modified:
+        if self.modified is not None and self.modified / 1000 > remote.modified / 1000:
             print(self.filetype + ' ' + fullpath + ' timestamp differs, replacing existing ' + str(remote) + ' with ' + str(self))
             return False
 
