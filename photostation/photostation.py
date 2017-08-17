@@ -170,26 +170,28 @@ class PhotoStationPhoto(object):
             ',latitude:' + str(self.latitude) + \
             ',longitude:' + str(self.longitude) + '}'
 
+    @property
+    def fullpath(self):
+        return self.album.path + '/' + self.filename 
+
     # Merge with remote if able.
     # Return false if rewrite is needed.
     def merge(self):
-
-        fullpath = self.album.path + '/' + self.filename 
 
         remote = self.album.item(self.filename)
         if remote is None \
             or self.filename != remote.filename \
             or self.filetype != remote.filetype:
 
-            print(self.filetype + ' ' + fullpath + ' not found or cannot be merged with ' + str(remote))
+            # print(self.filetype + ' ' + self.fullpath + ' not found or cannot be merged with ' + str(remote))
             return False
 
         if self.modified is not None and self.modified / 1000 > remote.modified / 1000:
-            print(self.filetype + ' ' + fullpath + ' timestamp differs, replacing existing ' + str(remote) + ' with ' + str(self))
+            print(self.filetype + ' ' + self.fullpath + ' timestamp differs, replacing existing ' + str(remote) + ' with ' + str(self))
             return False
 
         if self.filesize is not None and self.filesize != remote.filesize:
-            print(self.filetype + ' ' + fullpath + ' filesize differs, replacing existing ' + str(remote) + ' with ' + str(self))
+            print(self.filetype + ' ' + self.fullpath + ' filesize differs, replacing existing ' + str(remote) + ' with ' + str(self))
             return False
 
         changes = {}
@@ -205,7 +207,7 @@ class PhotoStationPhoto(object):
             changes['gps_lng'] = self.longitude
 
         if len(changes) > 0:
-            print(self.filetype + ' ' + fullpath +  ' has metadata changes ' + str(changes) + ', updating existing ' + str(remote))
+            print(self.filetype + ' ' + self.fullpath +  ' has metadata changes ' + str(changes) + ', updating existing ' + str(remote))
             self.update(changes)
 
         return True

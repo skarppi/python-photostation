@@ -13,7 +13,7 @@ class SynologySession(object):
         self.url = url
         self.session = requests.Session()
 
-        self.headers = None
+        self.headers = {}
         self.info = {
                 'SYNO.API.Info': {
                     'path': 'query.php'
@@ -28,7 +28,7 @@ class SynologySession(object):
         data.setdefault('api', api)
         data.setdefault('version', 1)
 
-        headers=self.headers
+        headers=self.headers.copy()
 
         if "original" in data:
             data = MultipartEncoder(fields=data)
