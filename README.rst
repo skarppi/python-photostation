@@ -3,7 +3,7 @@ Synology PhotoStation Python API
 
 A Python API to communicate with `Photo Station <https://www.synology.com/en-global/dsm/6.1/packages/PhotoStation>`_ running on Synology NAS. Photos and videos are uploaded directly to PhotoStation through its Web API with various metadata including ratings, title, description, and GPS coordinates.
 
-This module uploads only original files and lets Synology to process the required thumbnail versions. This works fine with Synology DS916+ but might be too slow with models having slower processors.
+This module uploads original files and lets Synology to process the required thumbnail versions. This works fine with Synology DS916+ but might be too slow with models having slower processors.
 
 Supported features:
 

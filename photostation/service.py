@@ -2,9 +2,9 @@ import requests
 import time
 import io
 from requests_toolbelt.downloadutils import stream
-from session import SynologyAuthSession
-from utils import PhotoStationUtils
-from error import SynologyException
+from photostation.session import SynologyAuthSession
+from photostation.utils import PhotoStationUtils
+from photostation.error import SynologyException
 from pprint import pprint, pformat
 
 class PhotoStationService(object):

@@ -3,9 +3,12 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 import os
 import pickle
 import time
-from urlparse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 from pprint import pprint, pformat
-from error import SynologyException
+from photostation.error import SynologyException
 
 class SynologySession(object):
 

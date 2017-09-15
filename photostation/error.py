@@ -49,4 +49,4 @@ class SynologyException(Exception):
         if code in self.API_ERROR:
             self.value = self.API_ERROR[code]
         else:
-            self.value = 'Unknown error from API (%d)' % code
+            self.value = code

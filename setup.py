@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='photostation',
-    version='0.1.4',
+    version='0.1.5',
     description='A Python API to communicate with Photo Station running on Synology NAS.',
     long_description=long_description,
     url='https://github.com/skarppi/python-photostation',
@@ -30,6 +30,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     keywords='synology dsm photo station web api',

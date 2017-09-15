@@ -1,2 +1,2 @@
-from photostation import PhotoStationService
-from error import SynologyException
+from photostation.service import PhotoStationService
+from photostation.error import SynologyException
